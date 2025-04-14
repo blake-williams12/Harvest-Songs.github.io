@@ -4,7 +4,7 @@ const apiKey = null; // You might need an API key for more complex scenarios, bu
 const sheetName = 'Harvest Songs'; // Replace with the name of your sheet if it's not 'Sheet1'
 const dataContainer = document.getElementById('data-container');
 
-const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}!A1:K424?key=${apiKey}`;
+const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}!A1:K`;
 // Note: A1:I assumes your data starts in the first row and goes up to column I. Adjust if needed.
 
 fetch(url)
