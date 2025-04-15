@@ -1,31 +1,38 @@
-const sheetId = '1XcbV2YsbjketYuOLoI_QLspyYToqX72l9Xm-g6tBFMA'; // Replace with your actual Sheet ID
-// Shareable link: https://docs.google.com/spreadsheets/d/1XcbV2YsbjketYuOLoI_QLspyYToqX72l9Xm-g6tBFMA/edit?usp=sharing
-const apiKey = null; // You might need an API key for more complex scenarios, but not for basic public sharing
-const sheetName = 'Harvest Songs'; // Replace with the name of your sheet if it's not 'Sheet1'
+const csvFilePath = 'Harvest%20Songs.csv'; // Path to your CSV file
 const dataContainer = document.getElementById('data-container');
 
-const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}!A1:K`;
-// Note: A1:I assumes your data starts in the first row and goes up to column I. Adjust if needed.
+fetch(csvFilePath)
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.text(); // Get the CSV data as text
+  })
+  .then(csvData => {
+    // Parse the CSV data
+    const lines = csvData.trim().split('\n');
+    if (lines.length > 0) {
+      const headers = lines[0].split(','); // Assuming comma-separated values
+      const songData = lines.slice(1).map(line => {
+        const values = line.split(',');
+        const rowData = {};
+        headers.forEach((header, index) => {
+          rowData[header.trim()] = values[index] ? values[index].trim() : ''; // Handle potential empty values
+        });
+        return rowData;
+      });
 
-fetch(url)
-  .then(response => response.json())
-  .then(data => {
-    const values = data.values;
-    if (values && values.length > 0) {
-      // Assuming the first row contains headers
-      const headers = values[0];
-      const songData = values.slice(1); // Get data rows
-
+      // Create the HTML table
       let html = '<table><thead><tr>';
       headers.forEach(header => {
-        html += `<th>${header}</th>`;
+        html += `<th>${header.trim()}</th>`;
       });
       html += '</tr></thead><tbody>';
 
       songData.forEach(row => {
         html += '<tr>';
-        row.forEach(cell => {
-          html += `<td>${cell}</td>`;
+        headers.forEach(header => {
+          html += `<td>${row[header.trim()]}</td>`;
         });
         html += '</tr>';
       });
@@ -33,10 +40,10 @@ fetch(url)
       html += '</tbody></table>';
       dataContainer.innerHTML = html;
     } else {
-      dataContainer.innerText = 'No data found in the sheet.';
+      dataContainer.innerText = 'No data found in the CSV file.';
     }
   })
   .catch(error => {
-    console.error('Error fetching data:', error);
-    dataContainer.innerText = 'Failed to load data.';
+    console.error('Error fetching or parsing CSV:', error);
+    dataContainer.innerText = 'Failed to load data from CSV.';
   });
